@@ -77,7 +77,8 @@ class LMVN(Func):
 
     def func(self, p):
         S = p * self.V2 + self.V
-        return stats.multivariate_normal.logpdf(self.Z, cov=S)
+        mu = np.zeros(S.shape[0])
+        return stats.multivariate_normal.logpdf(self.Z,  mean=mu, cov=S)
 
     def grad(self, p):
         S = p * self.V2 + self.V
@@ -137,12 +138,12 @@ def main(args):
 
     callback = lambda x: print("Current val = {}".format(x))
 
-    p0 = 10
-    print("Optimizing MVN")
-    res = opt.fmin_ncg(lmvn_f, p0, fprime=lmvn_g, fhess=lmvn_h, callback=callback)
+    p0 = 60
+    print("Optimizing MVN Trust-Newton CG")
+    res = opt.minimize(lmvn_f, p0, method="trust-ncg", jac=lmvn_g, hess=lmvn_h, callback=callback)
 
-    print("Optimizing LBF")
-    res = opt.fmin_ncg(lbf_f, p0, fprime=lbf_g, fhess=lbf_h, callback=callback)
+    print("Optimizing LBF Newton CG")
+    res = opt.minimize(lbf_f, p0, method="trust-ncg", jac=lbf_g, hess=lbf_h, callback=callback)
 
 
     return 0
